@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import _ from "lodash";
 import { Model } from "mongoose";
 import path from "path";
-import { generateFields, isJson, parseBody } from "./utils";
+import { generateFields, parseBody } from "./utils";
 
 export function init(app: Express, models: Array<Model<any>>) {
   app.set("views", [path.join(__dirname, "views"), app.settings.views]);
@@ -54,12 +54,7 @@ export function init(app: Express, models: Array<Model<any>>) {
         const errors = Object.keys(err.errors).map(key => {
           const error = err.errors[key];
           const message = error.message;
-
-          if (isJson(error.value)) {
-            return message.replace("(`" + error.value + "`)", "");
-          }
-
-          return message;
+          return message.replace("(`" + error.value + "`)", "");
         });
 
         res.render("create", {

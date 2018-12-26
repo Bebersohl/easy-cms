@@ -70,10 +70,11 @@ mixin wizard(field)
   .measure.mb3.flex.items-center
     +label(field)
     .w-75
-      .quill-editor(data-options=field.options)
+      .quill-editor(data-options=JSON.stringify(field))
       small.red(class="small-" + field.name).small-danger-text
       input(type="hidden" name=field.name)
 
 mixin errorList(errors)
-  each error in errors
-    .bg-washed-red.ba.b--dark-red.dark-red.pa3.mv2.br2= error
+  .mb3
+    each error in errors
+      .bg-washed-red.ba.b--dark-red.dark-red.pa3.mv2.br2= error

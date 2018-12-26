@@ -54,22 +54,16 @@ export function generateFields(paths: any, nestedName = ""): any[] {
         default: options.default
       };
 
-      if (base.type === "text" || base.type === "textarea") {
+      if (
+        base.type === "text" ||
+        base.type === "textarea" ||
+        base.type === "wizard"
+      ) {
         return {
           ...base,
           minlength: options.minlength,
           maxlength: options.maxlength
-        };
-      }
-
-      if (base.type === "wizard") {
-        return {
-          ...base,
-          element: options.element,
-          options: JSON.stringify({
-            ...base,
-            ...options
-          })
+          // element: options.element
         };
       }
 
@@ -165,18 +159,4 @@ function convertDateToString(date: Date) {
   return new Date(date.getTime() - date.getTimezoneOffset() * 60000)
     .toISOString()
     .split("T")[0];
-}
-
-export function isJson(item: string) {
-  try {
-    item = JSON.parse(item);
-  } catch (e) {
-    return false;
-  }
-
-  if (typeof item === "object" && item !== null) {
-    return true;
-  }
-
-  return false;
 }
