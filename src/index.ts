@@ -19,8 +19,8 @@ export function init(app: Express, models: Array<Model<any>>) {
     } = model;
 
     const data = {
-      modelName,
       collectionName,
+      modelName,
       schema: model.schema,
       fields: generateFields(paths)
     };
@@ -46,8 +46,8 @@ export function init(app: Express, models: Array<Model<any>>) {
         if (!err.errors) {
           res.render("create", {
             ...data,
-            fields,
-            errors: [JSON.stringify(err)]
+            errors: [JSON.stringify(err)],
+            fields
           });
         }
 
@@ -64,8 +64,8 @@ export function init(app: Express, models: Array<Model<any>>) {
 
         res.render("create", {
           ...data,
-          fields,
-          errors
+          errors,
+          fields
         });
       }
     });

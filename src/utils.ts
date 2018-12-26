@@ -21,9 +21,9 @@ export function parseBody(body: any) {
       value = [value];
     }
 
+    const newAcc = { ...acc };
     if (Array.isArray(value)) {
       value = value.filter(x => x !== "");
-      const newAcc = { ...acc };
 
       value.forEach((item: any, index: number) => {
         const path = key.replace("[]", "[" + index + "]");
@@ -33,7 +33,6 @@ export function parseBody(body: any) {
       return newAcc;
     }
 
-    const newAcc = { ...acc };
     _.set(newAcc, key, value);
     return newAcc;
   }, {});
@@ -141,7 +140,7 @@ export function parseType(field: any) {
 }
 
 export function formatDate(
-  date: number | Date | Function | undefined | string
+  date: number | Date | (() => number) | undefined | string
 ) {
   if (date === undefined) {
     return undefined;
