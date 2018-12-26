@@ -1,0 +1,79 @@
+mixin nav-li(text)
+  li.mr4
+    a(href="/").no-underline.dark-gray.fw6.f6 #{text}
+
+mixin fields(fields)
+  each field in fields
+    case field.type
+      when 'text'
+      when 'number'
+      when 'date'
+      when 'checkbox'
+        +input(field)
+      when 'textarea'
+        +textarea(field)
+      when 'wizard'
+        +wizard(field)
+      when 'array'
+        label= field.title
+          if field.required
+            span.b.red *
+          .pl4.pt3
+            .container
+              .fields
+                +fields(field.items)
+                .b--light-gray.w-50.bb.mb3
+            button.mb3.add-item-btn(type="button") Add Item
+
+mixin label(field)
+  unless field.hideLabel
+    label.w-25(for=field.name) #{field.title}
+      if field.required
+        span.b.red *
+
+mixin input(field)
+  .measure.mb3.flex.items-center
+    +label(field)
+    .w-75
+      if field.type === 'checkbox'
+        input(
+          type="hidden"
+          name=field.name
+          value="false"
+        )
+      input(
+        name=field.name
+        type=field.type
+        id=field.name
+        required=field.required
+        minlength=field.minlength
+        maxlength=field.maxlength
+        min=field.min
+        max=field.max
+        value=field.value || field.default
+        checked=field.default
+      )
+
+mixin textarea(field)
+  .measure.mb3.flex.items-center
+    +label(field)
+    .w-75
+      textarea(
+        name=field.name
+        id=field.name
+        required=field.required
+        minlength=field.minlength
+        maxlength=field.maxlength
+        )= field.value || field.default
+
+mixin wizard(field)
+  .measure.mb3.flex.items-center
+    +label(field)
+    .w-75
+      .quill-editor(data-options=field.options)
+      small.red(class="small-" + field.name).small-danger-text
+      input(type="hidden" name=field.name)
+
+mixin errorList(errors)
+  each error in errors
+    .bg-washed-red.ba.b--dark-red.dark-red.pa3.mv2.br2= error

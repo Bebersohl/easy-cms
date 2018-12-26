@@ -1,0 +1,22 @@
+doctype html
+include ./mixins.pug
+html
+  head
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tachyons/4.11.1/tachyons.min.css")
+    link(rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway:300,400,500,700")
+    link(rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.snow.min.css")
+    script(src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.6/quill.min.js")
+    style.
+      body {
+        font-family: "Raleway", "HelveticaNeue", "Helvetica Neue", Helvetica, Arial, sans-serif;
+      }
+    title simple cms
+  body.mt5
+    nav.h3.w-100.fixed.top-0.left-0.ttu.tracked.bb.b--light-gray.bg-white
+      ul.flex.items-center.h-100.list.ma0.mw7.center.pa3
+        +nav-li('home')
+        +nav-li('home')
+        +nav-li('home')
+
+    .mw7.center.pa3
+      block content
