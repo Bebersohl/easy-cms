@@ -1,4 +1,20 @@
 extends layout
 include ./mixins.pug
 block content
-  h3 #{modelName} List
+  h3 #{docs.length} #{collectionName} 
+  .flex
+    input(placeholder="search")
+    button Download
+    button Create #{modelName}
+  table
+    thead
+      tr
+        each field in fields
+          th= field.title
+    tbody
+      tr
+        each doc in docs
+          each field in fields
+            td= doc[field.name]
+
+  pre= JSON.stringify({ docs, docKeys, fields}, null, 2)

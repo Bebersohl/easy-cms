@@ -27,8 +27,11 @@ export function init(app: Express, models: Array<Model<any>>) {
 
     app.get(`/cms/${collectionName}`, async (req, res, next) => {
       const docs = await model.find({});
-      res.send(docs);
-      res.render("list", options);
+
+      res.render("list", {
+        ...options,
+        docs
+      });
     });
 
     app.get(`/cms/${collectionName}/create`, (req, res, next) => {

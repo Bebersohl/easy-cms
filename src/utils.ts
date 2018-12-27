@@ -147,7 +147,7 @@ export function generateFields(paths: any, nestedName = ""): any[] {
         };
       }
     });
-  return fields;
+  return _.sortBy(fields, ["title"]);
 }
 
 export function parseType(field: any) {
