@@ -1,13 +1,15 @@
+
+
 extends layout
 include ./mixins.pug
 block content
-  h3 Create a #{modelName}
+  h3 Update a #{modelName}
   if errors
     +errorList(errors)
   form(method="post")
     +fields(fields)
 
-    button(type='submit') Create
+    button(type='submit') Update
     button Cancel
   pre.
     [[fields]]

@@ -1,4 +1,39 @@
+import { Request, Response } from "express";
 import _ from "lodash";
+
+export function handleError(
+  err: any,
+  options: any,
+  req: Request,
+  res: Response
+) {
+  const fields = options.fields.map((field: any) => {
+    return {
+      ...field,
+      value: req.body[field.name]
+    };
+  });
+
+  if (!err.errors) {
+    res.render("create", {
+      ...options,
+      errors: [JSON.stringify(err)],
+      fields
+    });
+  }
+
+  const errors = Object.keys(err.errors).map(key => {
+    const error = err.errors[key];
+    const message = error.message;
+    return message.replace("(`" + error.value + "`)", "");
+  });
+
+  res.render("create", {
+    ...options,
+    errors,
+    fields
+  });
+}
 
 export function parseBody(body: any) {
   return Object.keys(body).reduce((acc: any, key) => {

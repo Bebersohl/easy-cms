@@ -2,7 +2,7 @@ import express, { Express } from "express";
 import _ from "lodash";
 import { Model } from "mongoose";
 import path from "path";
-import { generateFields, parseBody } from "./utils";
+import { generateFields, handleError, parseBody } from "./utils";
 
 export function init(app: Express, models: Array<Model<any>>) {
   app.set("views", [path.join(__dirname, "views"), app.settings.views]);
@@ -18,15 +18,21 @@ export function init(app: Express, models: Array<Model<any>>) {
       collection: { collectionName }
     } = model;
 
-    const data = {
+    const options = {
       collectionName,
       modelName,
       schema: model.schema,
       fields: generateFields(paths)
     };
 
+    app.get(`/cms/${collectionName}`, async (req, res, next) => {
+      const docs = await model.find({});
+      res.send(docs);
+      res.render("list", options);
+    });
+
     app.get(`/cms/${collectionName}/create`, (req, res, next) => {
-      res.render("create", data);
+      res.render("create", options);
     });
 
     app.post(`/cms/${collectionName}/create`, async (req, res, next) => {
@@ -35,34 +41,30 @@ export function init(app: Express, models: Array<Model<any>>) {
       try {
         const foo = await model.create(formData);
         res.send("success");
-      } catch (err) {
-        const fields = data.fields.map(field => {
-          return {
-            ...field,
-            value: req.body[field.name]
-          };
-        });
-
-        if (!err.errors) {
-          res.render("create", {
-            ...data,
-            errors: [JSON.stringify(err)],
-            fields
-          });
-        }
-
-        const errors = Object.keys(err.errors).map(key => {
-          const error = err.errors[key];
-          const message = error.message;
-          return message.replace("(`" + error.value + "`)", "");
-        });
-
-        res.render("create", {
-          ...data,
-          errors,
-          fields
-        });
+      } catch (error) {
+        handleError(error, options, req, res);
       }
+    });
+
+    app.get(`/cms/${collectionName}/:id`, async (req, res, next) => {
+      try {
+        const item = model.findById(req.params.id);
+        res.send(item);
+        res.render("update", options);
+      } catch (error) {
+        // console.log(error);
+      }
+    });
+
+    app.post(`/cms/${collectionName}/:id`, async (req, res, next) => {
+      const formData = parseBody(req.body);
+      res.send(formData);
+      // try {
+      //   const foo = await model.create(formData);
+      //   res.send("success");
+      // } catch (error) {
+      //   handleError(error, options, req, res);
+      // }
     });
   });
 }
