@@ -24,7 +24,7 @@ quillDivs.forEach(quillDiv => {
   quillEditors.push(quillEditor)
 })
 
-const form = document.querySelector('form')
+const form = document.querySelector('form.post-form')
 
 if(form) {
   form.onsubmit = onFormSubmit

@@ -4,7 +4,7 @@ block content
   h3 Create a #{modelName}
   if errors
     +errorList(errors)
-  form(method="post")
+  form.post-form(method="post")
     +fields(fields)
 
     button(type='submit') Create

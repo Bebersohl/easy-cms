@@ -1,20 +1,44 @@
 extends layout
 include ./mixins.pug
 block content
-  h3 #{docs.length} #{collectionName} 
-  .flex
-    input(placeholder="search")
-    button Download
-    button Create #{modelName}
-  table
-    thead
-      tr
-        each field in fields
-          th= field.title
-    tbody
-      tr
-        each doc in docs
-          each field in fields
-            td= doc[field.name]
+  if collectionIsEmpty
+    .flex.w-100.justify-center.items-center.flex-column
+      p no #{collectionName}
+      a(href=`/cms/${collectionName}/create`) create
+  else
+    h3 #{docs.length} #{collectionName} 
+    .flex
+      form
+        input(name="search" placeholder="search" value=query.search)
+        input(type="hidden" name="order" value=query.order || 'asc')
+        input(type="hidden" name="orderBy" value=query.orderBy)
+        button Search
+      button Download
+      a(href=`/cms/${collectionName}/create`) Create #{modelName}
+    if docs.length === 0 
+      .flex.w-100.justify-center.items-center.flex-column
+        p no #{collectionName} found
+    else
+      table.w-100.pv3.dt--fixed
+        colgroup
+          each field, index in fields
+            col
+        thead
+          tr
+            each field in fields
+              th.fw5.bb.b--black-20.tl.pb3.pr3.bg-white
+                - const order = query.order === 'asc' && query.orderBy === field.name ? 'desc' : 'asc'
+                a(href=`?search=${query.search || ''}&order=${order}&orderBy=${field.name}`)
+                  | #{field.title}
+                  if query.orderBy === field.name
+                    if order === 'asc'
+                      i.fas.fa-sort-down
+                    else
+                      i.fas.fa-sort-up
+        tbody.lh-copy
+          each doc in docs
+            tr
+              each field in fields
+                td.pv3.pr3.bb.b--black-20.truncate.mw-100= doc[field.name]
 
-  pre= JSON.stringify({ docs, docKeys, fields}, null, 2)
+    pre= JSON.stringify({ query, docs, docKeys, fields}, null, 2)
