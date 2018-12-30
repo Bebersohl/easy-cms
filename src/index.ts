@@ -21,19 +21,22 @@ export function init(app: Express, models: Array<Model<any>>) {
     const options = {
       collectionName,
       modelName,
-      schema: model.schema,
       fields: generateFields(paths),
     }
 
     app.get(`/cms/${collectionName}`, async (req, res, next) => {
       try {
         let dbQuery = {}
+        const orderBy = _.get(req, 'query.orderBy') || options.fields[0].name
+        const order = _.get(req, 'query.order', '1')
+        const index = parseInt(_.get(req, 'query.index', 0), 10)
+        const search = _.get(req, 'query.search', '')
 
-        if (req.query.search) {
+        if (search) {
           const searchFields = options.fields
-            .filter(field => field.type === 'text' || field.type === 'date')
+            .filter(field => field.type === 'text')
             .map(field => ({
-              [field.name]: createRegex(req.query.search),
+              [field.name]: createRegex(search),
             }))
 
           dbQuery = {
@@ -41,20 +44,65 @@ export function init(app: Express, models: Array<Model<any>>) {
           }
         }
 
-        let docs = await model.find(dbQuery)
+        const collectionCount = search
+          ? await model.countDocuments(dbQuery)
+          : await model.estimatedDocumentCount()
 
-        if (req.query.orderBy) {
-          docs = _.sortBy(docs, [req.query.orderBy])
+        const docs = await model
+          .find(dbQuery)
+          .sort({ [orderBy]: order })
+          .skip(index)
+          .limit(100)
+
+        let pagesStart = index - 500
+        let pagesStartOverflow = 0
+        let pagesEnd = index + 500
+        let pagesEndOverflow = 0
+        const pagesCap = Math.ceil(collectionCount / 100) * 100
+
+        if (pagesStart < 0) {
+          pagesStartOverflow = Math.abs(pagesStart)
         }
 
-        if (req.query.order === 'desc') {
-          docs = docs.reverse()
+        if (pagesEnd > pagesCap) {
+          pagesEndOverflow = pagesEnd - pagesCap
+        }
+
+        pagesStart = Math.max(pagesStart - pagesEndOverflow, 0)
+        pagesEnd = Math.min(pagesCap, pagesEnd + pagesStartOverflow)
+
+        const pages = _.range(pagesStart, pagesEnd, 100).map(i => ({
+          text: (i / 100 + 1).toString(),
+          offset: i,
+        }))
+
+        if (pagesStart !== 0) {
+          pages.unshift({
+            text: '...',
+            offset: 0,
+          })
+        }
+
+        if (pagesEnd !== pagesCap) {
+          pages.push({
+            text: '...',
+            offset: pagesCap - 100,
+          })
         }
 
         res.render('list', {
           ...options,
-          collectionIsEmpty: !req.query.search && !docs.length,
-          query: req.query,
+          collectionCount,
+          collectionIsEmpty: !search && !docs.length,
+          query: {
+            orderBy,
+            order,
+            search,
+            index,
+          },
+          pages,
+          fromIndex: index + 1,
+          toIndex: Math.min(collectionCount, index + 100),
           docs,
         })
       } catch (err) {

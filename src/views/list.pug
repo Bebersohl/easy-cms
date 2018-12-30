@@ -6,12 +6,21 @@ block content
       p no #{collectionName}
       a(href=`/cms/${collectionName}/create`) create
   else
-    h3 #{docs.length} #{collectionName} 
+    .flex.items-baseline
+      h3 #{collectionCount} #{collectionName}
+      if collectionCount > 100
+        p.ml3 Showing #{fromIndex} to #{toIndex}
+          each page in pages 
+            if page === query.index
+              p.ml2= page.text
+            else
+              a.ml2(href=`?search=${query.search}&order=${query.order}&orderBy=${query.orderBy}&index=${page.offset}`)= page.text
     .flex
       form
         input(name="search" placeholder="search" value=query.search)
-        input(type="hidden" name="order" value=query.order || 'asc')
+        input(type="hidden" name="order" value=query.order || '1')
         input(type="hidden" name="orderBy" value=query.orderBy)
+        input(type="hidden" name="index" value=query.index)
         button Search
       button Download
       a(href=`/cms/${collectionName}/create`) Create #{modelName}
@@ -27,11 +36,11 @@ block content
           tr
             each field in fields
               th.fw5.bb.b--black-20.tl.pb3.pr3.bg-white
-                - const order = query.order === 'asc' && query.orderBy === field.name ? 'desc' : 'asc'
-                a(href=`?search=${query.search || ''}&order=${order}&orderBy=${field.name}`)
+                - const order = query.order === '1' && query.orderBy === field.name ? '-1' : '1'
+                a(href=`?search=${query.search}&order=${order}&orderBy=${field.name}&index=${query.index}`)
                   | #{field.title}
                   if query.orderBy === field.name
-                    if order === 'asc'
+                    if order === '1'
                       i.fas.fa-sort-down
                     else
                       i.fas.fa-sort-up
@@ -40,5 +49,3 @@ block content
             tr
               each field in fields
                 td.pv3.pr3.bb.b--black-20.truncate.mw-100= doc[field.name]
-
-    pre= JSON.stringify({ query, docs, docKeys, fields}, null, 2)
