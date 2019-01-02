@@ -8,8 +8,6 @@ block content
     +fields(fields)
 
     button(type='submit') Create
-    button Cancel
-  pre.
-    [[fields]]
-    !{JSON.stringify(fields, null, 2)}
+    a(href=`/cms/${modelName}`) Cancel
+
 

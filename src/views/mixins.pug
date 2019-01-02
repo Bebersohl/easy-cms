@@ -14,6 +14,8 @@ mixin fields(fields)
         +textarea(field)
       when 'wizard'
         +wizard(field)
+      when 'objectid'
+        +select(field)
       when 'array'
         label= field.title
           if field.required
@@ -52,6 +54,16 @@ mixin input(field)
         max=field.max
         value=field.value || field.default
         checked=field.default
+      )
+
+mixin select(field)
+  .measure.mb3.flex.items-center
+    +label(field)
+    .w-75
+      select.field-select(
+        name=field.name
+        required=field.required
+        data-ref=field.ref
       )
 
 mixin textarea(field)

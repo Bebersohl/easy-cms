@@ -26,7 +26,7 @@ export function handleError(
   if (!err.errors) {
     res.render('create', {
       ...options,
-      errors: [JSON.stringify(err)],
+      errors: [err],
       fields,
     })
   }
@@ -155,8 +155,18 @@ export function generateFields(paths: any, nestedName = ''): any[] {
           items,
         }
       }
+
+      if (base.type === 'objectid') {
+        console.log('field', field)
+        return {
+          ...base,
+          ref: field.options.ref,
+        }
+      }
+
+      console.log('NOT SUPPORTED:', base.type)
     })
-  return _.sortBy(fields, ['title'])
+  return fields // _.sortBy(fields, ['title'])
 }
 
 export function parseType(field: any) {

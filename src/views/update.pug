@@ -10,10 +10,4 @@ block content
     +fields(fields)
 
     button(type='submit') Update
-    button Cancel
-  pre.
-    [[fields]]
-    !{JSON.stringify(fields, null, 2)}
-    
-    [[schema]]
-    !{JSON.stringify(schema, null, 2)}
+    a(href=`/cms/${modelName}`) Cancel

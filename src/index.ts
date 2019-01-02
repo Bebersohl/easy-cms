@@ -2,6 +2,7 @@ import express, { Express } from 'express'
 import _ from 'lodash'
 import { Model } from 'mongoose'
 import path from 'path'
+import url from 'url'
 import { createRegex, generateFields, handleError, parseBody } from './utils'
 
 export function init(app: Express, models: Array<Model<any>>) {
@@ -9,6 +10,10 @@ export function init(app: Express, models: Array<Model<any>>) {
   app.set('view engine', 'pug')
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
+  app.use((req, res, next) => {
+    res.locals.require = require
+    next()
+  })
 
   models.forEach(model => {
     const {
@@ -24,7 +29,7 @@ export function init(app: Express, models: Array<Model<any>>) {
       fields: generateFields(paths),
     }
 
-    app.get(`/cms/${collectionName}`, async (req, res, next) => {
+    app.get(`/cms/${modelName}`, async (req, res, next) => {
       try {
         let dbQuery = {}
         const orderBy = _.get(req, 'query.orderBy') || options.fields[0].name
@@ -110,32 +115,53 @@ export function init(app: Express, models: Array<Model<any>>) {
       }
     })
 
-    app.get(`/cms/${collectionName}/create`, (req, res, next) => {
+    app.post(`/cms/${modelName}`, async (req, res, next) => {
+      try {
+        const search = url.parse(req.url).search
+        if (typeof req.body._id === 'string') {
+          await model.deleteOne({ _id: req.body._id })
+          res.redirect(`/cms/${modelName}${search}`)
+        }
+
+        await model.deleteMany({ _id: { $in: req.body._id } })
+        res.redirect(`/cms/${modelName}${search}`)
+      } catch (err) {
+        // console.log(err)
+      }
+    })
+
+    app.get(`/cms/${modelName}/create`, (req, res, next) => {
       res.render('create', options)
     })
 
-    app.post(`/cms/${collectionName}/create`, async (req, res, next) => {
+    app.post(`/cms/${modelName}/create`, async (req, res, next) => {
       const formData = parseBody(req.body)
 
       try {
-        const foo = await model.create(formData)
-        res.send('success')
+        const doc = await model.create(formData)
+        res.redirect(`/cms/${modelName}/${doc._id}`)
       } catch (error) {
         handleError(error, options, req, res)
       }
     })
 
-    app.get(`/cms/${collectionName}/:id`, async (req, res, next) => {
+    app.get(`/cms/${modelName}/:id`, async (req, res, next) => {
       try {
-        const item = model.findById(req.params.id)
-        res.send(item)
-        res.render('update', options)
+        const doc = await model.findById(req.params.id)
+
+        res.render('update', {
+          ...options,
+          fields: options.fields.map(field => ({
+            ...field,
+            value: doc[field.name],
+          })),
+        })
       } catch (error) {
-        // console.log(error);
+        console.log(error)
       }
     })
 
-    app.post(`/cms/${collectionName}/:id`, async (req, res, next) => {
+    app.post(`/cms/${modelName}/:id`, async (req, res, next) => {
       const formData = parseBody(req.body)
       res.send(formData)
       // try {
@@ -144,6 +170,15 @@ export function init(app: Express, models: Array<Model<any>>) {
       // } catch (error) {
       //   handleError(error, options, req, res);
       // }
+    })
+
+    app.get(`/cms/api/${modelName}/all`, async (req, res, next) => {
+      try {
+        const docs = await model.find({})
+        res.json(docs)
+      } catch (err) {
+        console.log(err)
+      }
     })
   })
 }
