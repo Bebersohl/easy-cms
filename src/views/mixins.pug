@@ -1,6 +1,6 @@
-mixin nav-li(text)
+mixin nav-li(modelName)
   li.mr4
-    a(href="/").no-underline.dark-gray.fw6.f6 #{text}
+    a(href=`/cms/${modelName}`).no-underline.dark-gray.fw6.f6 #{modelName}
 
 mixin fields(fields)
   each field in fields

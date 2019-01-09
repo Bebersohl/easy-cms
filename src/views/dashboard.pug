@@ -1,0 +1,12 @@
+extends layout
+
+block content
+  each modelArr in navigation
+    h3= modelArr[0]
+    .flex
+      each modelName in modelArr
+        .flex.ba.pa3.mr3.w5.justify-between.flex-column
+          .flex.justify-between.mb2
+            a(href=`/cms/${modelName}`)= modelName
+            a(href=`/cms/${modelName}/create`) create
+          div #{documentCountMap[modelName]} #{documentCountMap[modelName] === 1 ? 'item' : 'items'}

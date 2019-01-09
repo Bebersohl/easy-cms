@@ -14,11 +14,20 @@ html
       }
     title simple cms
   body.mt5
-    nav.h3.w-100.fixed.top-0.left-0.ttu.tracked.bb.b--light-gray.bg-white
-      ul.flex.items-center.h-100.list.ma0.mw7.center.pa3
-        +nav-li('home')
-        +nav-li('home')
-        +nav-li('home')
+    nav.ph4.h3.w-100.fixed.top-0.left-0.ttu.tracked.bb.b--light-gray.bg-white
+      ul.flex.items-center.h-100.list.ma0.pv3.ph0
+        li.mr4
+          a(href='/cms').no-underline.dark-gray.fw6.f6 Home
+        each modelArr in navigation
+          li.mr4
+            a(href=`/cms/${modelArr[0]}`).no-underline.dark-gray.fw6.f6 #{modelArr[0]}
+
+    if secondaryNavigation && secondaryNavigation.length
+      nav.bb.b--light-gray.pv2.ph4
+        ul.flex.list.ma0.pa0
+          each modelName in secondaryNavigation
+            li.mr4
+              a(href=`/cms/${modelName}`)= modelName
 
     .ph4.pt3
       block content

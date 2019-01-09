@@ -1,6 +1,7 @@
 extends layout
 include ./mixins.pug
 block content
+  a(href=`/cms/${modelName}`) Back
   h3 Create a #{modelName}
   if errors
     +errorList(errors)

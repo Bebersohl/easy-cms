@@ -57,6 +57,8 @@ block content
                   input.select-row(type="checkbox" name="_id" value=doc._id)
                 each field in fields
                   td.pv3.pr3.bb.b--black-20.truncate.mw-100
+                  
+                    //- TODO: move to backend
                     if field.name.includes('[]')
                       - const arr = _.get(doc, field.name.replace('[]', ''))
                       | #{JSON.stringify(arr)}

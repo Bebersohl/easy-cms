@@ -5,7 +5,7 @@ import path from 'path'
 import url from 'url'
 import { createRegex, generateFields, handleError, parseBody } from './utils'
 
-export function init(app: Express, models: Array<Model<any>>) {
+export function init(app: Express, models: Array<Array<Model<any>>>) {
   app.set('views', [path.join(__dirname, 'views'), app.settings.views])
   app.set('view engine', 'pug')
   app.use(express.json())
@@ -15,7 +15,34 @@ export function init(app: Express, models: Array<Model<any>>) {
     next()
   })
 
-  models.forEach(model => {
+  const navigation = models.map(modelArr =>
+    modelArr.map(model => model.modelName)
+  )
+
+  const allModels = _.flatten(models)
+
+  app.get('/cms', async (req, res, next) => {
+    const documentCountPromises: any[] = allModels.map(model =>
+      model.estimatedDocumentCount()
+    )
+
+    const documentCountArray = await Promise.all(documentCountPromises)
+
+    const documentCountMap = documentCountArray.reduce((map, count, index) => {
+      const modelName = allModels[index].modelName
+      return {
+        ...map,
+        [modelName]: count,
+      }
+    }, {})
+
+    res.render('dashboard', {
+      navigation,
+      documentCountMap,
+    })
+  })
+
+  allModels.forEach(model => {
     const {
       modelName,
       // @ts-ignore
@@ -23,10 +50,16 @@ export function init(app: Express, models: Array<Model<any>>) {
       collection: { collectionName },
     } = model
 
+    const secondaryNavigation = (
+      navigation.find(arr => arr.includes(modelName)) || []
+    ).slice(1)
+
     const options = {
       collectionName,
       modelName,
       fields: generateFields(paths),
+      navigation,
+      secondaryNavigation,
     }
 
     app.get(`/cms/${modelName}`, async (req, res, next) => {
