@@ -1,11 +1,10 @@
 extends layout
 include ./mixins.pug
 block content
-  - const _ = require('lodash')
   if collectionIsEmpty
     .flex.w-100.justify-center.items-center.flex-column
-      p no #{collectionName}
-      a(href=`/cms/${modelName}/create`) create
+      p No #{collectionName} found
+      a(href=`/cms/${modelName}/create`) Create One
   else
     .flex.items-baseline
       h3 #{collectionCount} #{collectionName}
@@ -28,7 +27,7 @@ block content
       a(href=`/cms/${modelName}/create`) Create #{modelName}
     if docs.length === 0 
       .flex.w-100.justify-center.items-center.flex-column
-        p no #{collectionName} found
+        p No #{collectionName} found
     else
       form.table-form(method="post")
         table.w-100.pv3.dt--fixed
@@ -55,15 +54,12 @@ block content
               tr
                 td.pv3.pr3.bb.b--black-20.truncate.mw-100
                   input.select-row(type="checkbox" name="_id" value=doc._id)
-                each field in fields
+                each field, index in fields
                   td.pv3.pr3.bb.b--black-20.truncate.mw-100
-                  
-                    //- TODO: move to backend
-                    if field.name.includes('[]')
-                      - const arr = _.get(doc, field.name.replace('[]', ''))
-                      | #{JSON.stringify(arr)}
-                    else if field.type === 'date'
-                      | #{new Date(_.get(doc, field.name)).toLocaleDateString()}
-                    else 
-                      | #{_.get(doc, field.name)}
+                    if index === 0
+                      a(href=`/cms/${modelName}/${doc.id}`)
+                        | #{printDocumentField(field, doc)}
+                    else
+                      | #{printDocumentField(field, doc)}
+
 

@@ -13,15 +13,17 @@ if (selectPageBox) {
 
 if (deleteRowButton) {
   deleteRowButton.addEventListener('click', event => {
-    if (!tableForm) { return }
+    if (!tableForm) {
+      return
+    }
 
     const formData = new FormData(tableForm)
     if (!formData.get('_id')) {
       return alert('Select a row')
     }
 
-    alert('Delete these row(s)?')
-
-    tableForm.submit()
+    if (confirm('Delete these row(s)?')) {
+      tableForm.submit()
+    }
   })
 }

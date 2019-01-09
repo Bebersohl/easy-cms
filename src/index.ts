@@ -3,7 +3,13 @@ import _ from 'lodash'
 import { Model } from 'mongoose'
 import path from 'path'
 import url from 'url'
-import { createRegex, generateFields, handleError, parseBody } from './utils'
+import {
+  createRegex,
+  generateFields,
+  handleError,
+  parseBody,
+  printDocumentField,
+} from './utils'
 
 export function init(app: Express, models: Array<Array<Model<any>>>) {
   app.set('views', [path.join(__dirname, 'views'), app.settings.views])
@@ -11,7 +17,7 @@ export function init(app: Express, models: Array<Array<Model<any>>>) {
   app.use(express.json())
   app.use(express.urlencoded({ extended: true }))
   app.use((req, res, next) => {
-    res.locals.require = require
+    res.locals.printDocumentField = printDocumentField
     next()
   })
 
@@ -150,7 +156,7 @@ export function init(app: Express, models: Array<Array<Model<any>>>) {
 
     app.post(`/cms/${modelName}`, async (req, res, next) => {
       try {
-        const search = url.parse(req.url).search
+        const search = url.parse(req.url).search || ''
         if (typeof req.body._id === 'string') {
           await model.deleteOne({ _id: req.body._id })
           res.redirect(`/cms/${modelName}${search}`)

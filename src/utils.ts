@@ -1,6 +1,27 @@
 import { Request, Response } from 'express'
 import _ from 'lodash'
 
+export function printDocumentField(field: any, doc: any) {
+  if (field.name.includes('[]')) {
+    let arr = _.get(doc, field.name.replace('[]', ''))
+    arr = arr.map((arrField: any) => {
+      if (typeof arrField === 'object') {
+        return _.omit(arrField.toObject(), ['_id'])
+      }
+
+      return arrField
+    })
+
+    return JSON.stringify(arr)
+  }
+
+  if (field.type === 'date') {
+    return new Date(_.get(doc, field.name)).toLocaleDateString()
+  }
+
+  return _.get(doc, field.name)
+}
+
 export function regexEscape(str: string) {
   return str.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')
 }
